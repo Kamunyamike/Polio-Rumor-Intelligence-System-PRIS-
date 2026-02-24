@@ -71,4 +71,5 @@ if __name__ == "__main__":
         mission = "Investigate polio vaccine rumors in Kenya and alert if risk is high."
         agent_executor.invoke({"input": mission})
     except Exception as e:
+
         print(f"❌ Execution Error: {e}")
