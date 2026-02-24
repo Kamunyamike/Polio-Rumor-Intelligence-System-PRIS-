@@ -1,0 +1,8 @@
+streamlit
+pandas
+plotly
+requests
+langchain-google-genai
+langchain-community
+langchain-classic
+python-dotenv

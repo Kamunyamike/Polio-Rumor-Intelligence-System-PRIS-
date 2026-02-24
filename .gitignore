@@ -1,0 +1,14 @@
+# Secrets
+.env
+
+# Python environment
+venv/
+__pycache__/
+*.pyc
+
+# Data (Optional: ignore if you don't want to share the CSVs)
+# data/*.csv
+
+# System files
+.DS_Store
+Thumbs.db
