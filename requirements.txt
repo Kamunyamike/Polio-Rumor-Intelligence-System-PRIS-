@@ -2,7 +2,9 @@ streamlit
 pandas
 plotly
 requests
-langchain-google-genai
+langchain
+langchain-core
 langchain-community
 langchain-classic
+langchain-google-genai
 python-dotenv
