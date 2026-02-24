@@ -1,4 +1,4 @@
-from langchain.tools import tool
+from langchain_core.tools import tool
 from modules.collector import fetch_polio_data
 from modules.analyzer import analyze_signals
 
@@ -32,4 +32,5 @@ def alert_tool(summary: str):
     Input: A concise summary of the identified rumor and why it is dangerous.
     """
     # Logic for actual alert (SMS/Email/Console)
+
     return f"EMERGENCY ALERT SENT: {summary}"
