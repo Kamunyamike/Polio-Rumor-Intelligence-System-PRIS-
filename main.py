@@ -16,13 +16,9 @@ api_key = os.getenv("GOOGLE_API_KEY")
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
-    google_api_key=api_key,
-    temperature=0,
-    # 2026 'Thinking' configuration
-    thinking_budget=1024,
-    include_reasoning=True 
+    api_key=st.secrets["GOOGLE_API_KEY"],  # <--- Explicitly pass the key here
+    temperature=0.1
 )
-
 # 2. BUNDLE TOOLS
 tools = [collection_tool, analysis_tool, alert_tool]
 
@@ -73,3 +69,4 @@ if __name__ == "__main__":
     except Exception as e:
 
         print(f"❌ Execution Error: {e}")
+
