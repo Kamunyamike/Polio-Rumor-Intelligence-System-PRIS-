@@ -45,6 +45,13 @@ if st.sidebar.button("🚀 Run Agent Mission Now"):
 st.sidebar.divider()
 st.sidebar.info("System Status: Online (Integrated Mode)")
 
+# Safety Check this file to create the folder if it's missing:
+if not os.path.exists("data"):
+    os.makedirs("data")
+    # Create an empty CSV with headers so the app doesn't crash on the first run
+    df_empty = pd.DataFrame(columns=['source', 'risk_level', 'collected_at', 'summary'])
+    df_empty.to_csv("data/analyzed_signals.csv", index=False)
+    
 # --- 1. LOAD DATA ---
 DATA_PATH = "data/analyzed_signals.csv"
 
@@ -104,4 +111,5 @@ if os.path.exists(DATA_PATH):
 
 else:
     st.warning("⚠️ Awaiting Initial Data. Click 'Run Agent Mission Now' to start.")
+
 
