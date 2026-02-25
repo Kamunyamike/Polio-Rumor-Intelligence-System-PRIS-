@@ -7,40 +7,38 @@ import os
 @tool
 def collection_tool(query: str):
     """
-    REQUIRED FIRST STEP. Searches for real-world signals and news regarding 
-    polio vaccine rumors in a specific region. 
-    Input: A search query (e.g., 'Kenya polio vaccine rumors').
+    REQUIRED FIRST STEP. Searches for real-world signals regarding 
+    polio vaccine rumors. 
+    Input: A search query (e.g., 'Kenya polio vaccine news').
     """
     data = fetch_polio_data(query)
     if data.empty:
         return "No signals found for this region."
-    return f"Success. Collected {len(data)} signals. Sample: {data.head(2).to_dict()}"
+    return f"Success. Collected {len(data)} signals. Sample text: {data.head(2).to_dict()}"
 
 @tool
 def analysis_tool(context: str):
     """
-    CRITICAL STEP: Processes collected signals with a Multi-stage Filter.
-    1. FILTER: Discards any text NOT related to health/polio (e.g., politics, taxes).
-    2. TRANSLATE: Converts any non-English signals into clear English.
-    3. SCORE: Calculates risk (High/Medium/Low).
-    Input: The raw summary or context from the collection_tool.
+    SAVES TO DATABASE. Processes health-related signals.
+    STRICT RULES:
+    1. Only pass medical/vaccine/polio related text here.
+    2. Input MUST be translated to English before calling this tool.
+    Input: The English-translated medical rumor summary.
     """
-    # The 'context' passed here now contains the raw search results.
-    # We pass it to the analyzer, which now has a strict System Instruction:
-    # "If text is irrelevant to Polio/Health, return 'SKIP'. If non-English, translate."
-    
+    # The analyzer module handles the actual CSV writing logic
     report_file = analyze_signals(context) 
     
-    return f"Intelligence scrubbed, translated, and analyzed. Results appended to {report_file}."
+    if "SKIP" in report_file:
+        return "Data discarded: Irrelevant content detected by analyzer."
+        
+    return f"Intelligence verified and saved to {report_file}."
 
 @tool
 def alert_tool(summary: str):
     """
-    CONDITIONAL FINAL STEP. Sends an emergency broadcast to the health team.
-    ONLY use this tool if the analysis_tool has returned a 'High' risk status.
-    Input: A concise summary of the identified rumor and why it is dangerous.
+    EMERGENCY STEP. Sends broadcast to MoH team.
+    ONLY use if analysis_tool confirms 'High' risk.
+    Input: Concise summary of the rumor and the danger.
     """
-    # Logic for actual alert (SMS/Email/Console)
-
+    # Logic for actual alert dispatch would go here
     return f"EMERGENCY ALERT SENT: {summary}"
-
