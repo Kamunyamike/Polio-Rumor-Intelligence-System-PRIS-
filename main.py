@@ -6,28 +6,36 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_classic.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import PromptTemplate
 from langchain_classic.memory import ConversationBufferMemory
-# Ensure your tools are in modules/agent_tools.py
 from modules.agent_tools import collection_tool, analysis_tool, alert_tool
 
-load_dotenv()
+# --- 1. PRE-FLIGHT CHECKS ---
+# Ensure data directory exists so tools don't crash when saving CSVs
+if not os.path.exists("data"):
+    os.makedirs("data")
 
-# 1. SETUP BRAIN
-# Pull from .env for security
-api_key = os.getenv("GOOGLE_API_KEY")
+# --- 2. SECURE KEY HYBRID LOAD ---
+# This logic checks Streamlit Secrets first (Cloud), then .env (Local)
+api_key = st.secrets.get("GOOGLE_API_KEY")
+if not api_key:
+    load_dotenv()
+    api_key = os.getenv("GOOGLE_API_KEY")
 
+# --- 3. SETUP BRAIN ---
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
-    api_key=st.secrets["GOOGLE_API_KEY"],  # <--- Explicitly pass the key here
-    temperature=0.1
+    api_key=api_key,
+    temperature=0.1,
+    # 2026 Feature: Gives the agent extra 'thinking space' for reasoning
+    thinking_budget=1024 
 )
-# 2. BUNDLE TOOLS
+
+# --- 4. BUNDLE TOOLS ---
 tools = [collection_tool, analysis_tool, alert_tool]
 
-# 3. MEMORY SETUP
-# This allows the agent to remember the 'Thought' chain across multiple steps
+# --- 5. MEMORY SETUP ---
 memory = ConversationBufferMemory(memory_key="chat_history")
 
-# 4. PROMPT TEMPLATE (Updated to include {chat_history})
+# --- 6. PROMPT TEMPLATE ---
 template = """Answer the following questions as best you can. You have access to the following tools:
 
 {tools}
@@ -51,24 +59,23 @@ Thought:{agent_scratchpad}"""
 
 prompt = PromptTemplate.from_template(template)
 
-# 5. BUILD AGENT & EXECUTOR
+# --- 7. BUILD AGENT & EXECUTOR ---
 agent = create_react_agent(llm, tools, prompt)
 agent_executor = AgentExecutor(
     agent=agent, 
     tools=tools, 
     verbose=True, 
-    memory=memory, # Memory is now plugged in
+    memory=memory, 
     handle_parsing_errors=True,
-    max_iterations=10 # Prevents the agent from getting stuck
+    max_iterations=10 
 )
 
+# --- 8. LOCAL TESTING LOGIC ---
 if __name__ == "__main__":
     print("🚀 2026 AGENT ONLINE (Phase 3: Finalized)")
     try:
+        # Note: In the Streamlit app, this is triggered by the sidebar button
         mission = "Investigate polio vaccine rumors in Kenya and alert if risk is high."
         agent_executor.invoke({"input": mission})
     except Exception as e:
-
         print(f"❌ Execution Error: {e}")
-
-
