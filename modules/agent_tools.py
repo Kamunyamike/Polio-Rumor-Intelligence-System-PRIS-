@@ -1,6 +1,8 @@
 from langchain_core.tools import tool
 from modules.collector import fetch_polio_data
 from modules.analyzer import analyze_signals
+import pandas as pd
+import os
 
 @tool
 def collection_tool(query: str):
@@ -17,12 +19,19 @@ def collection_tool(query: str):
 @tool
 def analysis_tool(context: str):
     """
-    REQUIRED SECOND STEP. Processes the data collected by the collection_tool. 
-    It identifies specific rumor themes and calculates a risk score (High/Medium/Low).
-    Input: A brief context or summary of the collected data.
+    CRITICAL STEP: Processes collected signals with a Multi-stage Filter.
+    1. FILTER: Discards any text NOT related to health/polio (e.g., politics, taxes).
+    2. TRANSLATE: Converts any non-English signals into clear English.
+    3. SCORE: Calculates risk (High/Medium/Low).
+    Input: The raw summary or context from the collection_tool.
     """
-    report_file = analyze_signals()
-    return f"Analysis finished. Report saved at {report_file}. Risk levels have been computed."
+    # The 'context' passed here now contains the raw search results.
+    # We pass it to the analyzer, which now has a strict System Instruction:
+    # "If text is irrelevant to Polio/Health, return 'SKIP'. If non-English, translate."
+    
+    report_file = analyze_signals(context) 
+    
+    return f"Intelligence scrubbed, translated, and analyzed. Results appended to {report_file}."
 
 @tool
 def alert_tool(summary: str):
@@ -34,3 +43,4 @@ def alert_tool(summary: str):
     # Logic for actual alert (SMS/Email/Console)
 
     return f"EMERGENCY ALERT SENT: {summary}"
+
